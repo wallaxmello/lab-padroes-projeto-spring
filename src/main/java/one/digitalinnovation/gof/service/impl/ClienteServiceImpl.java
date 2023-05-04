@@ -2,13 +2,13 @@ package one.digitalinnovation.gof.service.impl;
 
 import java.util.Optional;
 
+import one.digitalinnovation.gof.service.EnderecoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import one.digitalinnovation.gof.model.Cliente;
-import one.digitalinnovation.gof.model.ClienteRepository;
+import one.digitalinnovation.gof.repository.ClienteRepository;
 import one.digitalinnovation.gof.model.Endereco;
-import one.digitalinnovation.gof.model.EnderecoRepository;
 import one.digitalinnovation.gof.service.ClienteService;
 import one.digitalinnovation.gof.service.ViaCepService;
 
@@ -26,7 +26,7 @@ public class ClienteServiceImpl implements ClienteService {
 	@Autowired
 	private ClienteRepository clienteRepository;
 	@Autowired
-	private EnderecoRepository enderecoRepository;
+	private EnderecoService enderecoService;
 	@Autowired
 	private ViaCepService viaCepService;
 	
@@ -69,10 +69,10 @@ public class ClienteServiceImpl implements ClienteService {
 	private void salvarClienteComCep(Cliente cliente) {
 		// Verificar se o Endereco do Cliente já existe (pelo CEP).
 		String cep = cliente.getEndereco().getCep();
-		Endereco endereco = enderecoRepository.findById(cep).orElseGet(() -> {
+		Endereco endereco = enderecoService.buscarEnderecoPorId(cep).orElseGet(() -> {
 			// Caso não exista, integrar com o ViaCEP e persistir o retorno.
 			Endereco novoEndereco = viaCepService.consultarCep(cep);
-			enderecoRepository.save(novoEndereco);
+			enderecoService.salvarEndereco(novoEndereco);
 			return novoEndereco;
 		});
 		cliente.setEndereco(endereco);
